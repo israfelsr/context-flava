@@ -46,7 +46,7 @@ if __name__ == "__main__":
         level=log_level,
     )
     LOG.setLevel(log_level)
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Create multimodal sst")
     parser.add_argument("--hf_repository",
                         type=str,
                         default="israfelsr/multimodal_sst",
@@ -63,7 +63,7 @@ if __name__ == "__main__":
                         type=int,
                         default=42,
                         help="Set seed for reproducibility")
-    parser.add_argumnet("--max_nsfw_tries",
+    parser.add_argument("--max_nsfw_tries",
                         type=int,
                         default=5,
                         help="Max tries to avoid nsfw warning")
