@@ -53,9 +53,11 @@ if __name__ == "__main__":
                         help="HuggingFace repository")
     parser.add_argument("--auth_token",
                         type=str,
+                        required=True,
                         help="HF authorization token for writing and reading")
     parser.add_argument("--device",
                         type=str,
+                        default="cuda",
                         help="Device to use: cuda or cpu")
     parser.add_argument("--seed",
                         type=int,
