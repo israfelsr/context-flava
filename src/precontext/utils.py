@@ -1,7 +1,15 @@
+import argparse
+import logging
 import torch
 
+from diffusers import StableDiffusionPipeline
 
-def generate_with_diffuser(sample, diffuser, latents, generator, args):
+LOG = logging.getLogger(__name__)
+
+
+def generate_with_diffuser(sample, diffuser: StableDiffusionPipeline,
+                           latents: torch.tensor, generator: torch.Generator,
+                           args: argparse.Namespace):
     with torch.autocast(args.device):
         image = diffuser(
             [sample["sentence"]],
@@ -22,6 +30,8 @@ def generate_with_diffuser(sample, diffuser, latents, generator, args):
                 latents=latents,
             )
         if idx == args.max_nsfw_tries:
+            LOG.info("NSFW detected and max number of tries reached")
+            LOG.info("Image set to black")
             break
     generator.manual_seed(args.seed)
     sample["pixel_array"] = image["sample"][0]
