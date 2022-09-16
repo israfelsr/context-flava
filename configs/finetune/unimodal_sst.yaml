@@ -19,7 +19,7 @@ training:
     monitor: validation/accuracy/classification
     mode: max
   lightning_load_from_checkpoint: null
-  seed: -1
+  seed: 42
   batch_size: 32
   num_workers: 4
   learning_rate: 1e-5
@@ -40,10 +40,8 @@ datasets:
     _target_: flava.definitions.TrainingSingleDatasetInfo
     train:
       - _target_: flava.definitions.HFDatasetInfo
-        key: glue
-        subset: qnli
-        rename_columns:
-          - ["question", "sentence1"]
-          - ["sentence", "sentence2"]
+        key: israfelsr/multimodal_sst
+        remove_columns:
+          - "idx"
     datamodule_extra_kwargs:
-      text_columns: ["sentence1", "sentence2"]
+      text_columns: ["sentence"]

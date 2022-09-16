@@ -1,6 +1,4 @@
-import argparse
 import logging
-import os
 import sys
 
 import datasets
@@ -9,13 +7,20 @@ import transformers
 from flava.data import TorchVisionDataModule, TextDataModule
 from flava.data.datamodules import VLDataModule
 from flava.definitions import FLAVAArguments
+from flava.model import FLAVAClassificationLightningModule
 from flava.utils import build_config, build_datamodule_kwargs
+from omegaconf import OmegaConf
+from pytorch_lightning import seed_everything, Trainer
+from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
+from pytorch_lightning.loggers import WandbLogger
 
 LOG = logging.getLogger(__name__)
 
 
 def main():
     config: FLAVAArguments = build_config()
+    if config.training.seed != -1:
+        seed_everything(config.training.seed, workers=True)
     # TODO: check the arguments in FLAVA
     # Setup logging
     log_level = logging.INFO
@@ -32,16 +37,6 @@ def main():
     transformers.utils.logging.enable_explicit_format()
 
     # Setting up the datamodule
-    # TODO: check the arguments for the datasets, example:
-    ''' {'train': [{'key': 'israfelsr/multimodal_sst',
-                    'remove_columns': None,
-                    'rename_columns': ["tokens", "tree"], 
-                    'split_key_mapping': {'train': 'train',
-                                          'validation': 'validation',
-                                          'test': 'test'}, 'extra_kwargs': {}}], 
-         'val': None, 'test': None, 'batch_size': None, 'num_workers': None,
-         'allow_uneven_batches': False,
-         'datamodule_extra_kwargs': {'text_columns': ['sentence']}}'''
     assert len(config.datasets.selected) == 1
     # TODO: when trianing multimodal/unimodal change config.dataset.selected
     if "image" in config.datasets.selected:
@@ -56,19 +51,34 @@ def main():
             finetuning=True,
         )
 
-    datamodule.setup("fit")
+    #datamodule.setup("fit")
 
-    # Testing dataset
-    LOG.info("Testing dataset")
-    LOG.info(f"Dataset {datamodule}")
-    #for sample in datamodule:
-    #    LOG.info(f"One sample: {sample}")
-    #    break
+    model = FLAVAClassificationLightningModule(
+        num_classes=config.datasets.num_classes,
+        learning_rate=config.training.learning_rate,
+        adam_eps=config.training.adam_eps,
+        adam_weight_decay=config.training.adam_weight_decay,
+        adam_betas=config.training.adam_betas,
+        warmup_steps=config.training.warmup_steps,
+        max_steps=config.training.lightning.max_steps,
+        **config.model,
+    )
 
-    # Detecting the last checkpoint
-    last_checkpoint = None
+    callbacks = [LearningRateMonitor(logging_interval="step")]
 
-    # Loading the datamodules
+    if config.training.lightning_checkpoint is not None:
+        callbacks.append(
+            ModelCheckpoint(**OmegaConf.to_container(
+                config.training.lightning_checkpoint)))
+
+    wandb_logger = WandbLogger()
+    trainer = Trainer(**OmegaConf.to_container(config.training.lightning),
+                      callbacks=callbacks,
+                      logger=wandb_logger,
+                      fast_dev_run=True)
+    ckpt_path = config.training.lightning_load_from_checkpoint
+    trainer.fit(model, datamodule=datamodule, ckpt_path=ckpt_path)
+    trainer.validate(datamodule=datamodule)
 
 
 if __name__ == "__main__":

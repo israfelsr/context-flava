@@ -74,7 +74,7 @@ def main():
         f"Pushing dataset to {args.hf_repository} hugging-face repository")
     multimodal_sst.push_to_hub("israfelsr/multimodal_sst",
                                private=True,
-                               use_auth_token=args.auth_token,
+                               token=args.auth_token,
                                split=args.split)
 
 
