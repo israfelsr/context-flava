@@ -45,7 +45,7 @@ def setup_args():
     return args
 
 
-def main(args: argparse.Namespace):
+def main():
     args = setup_args()
     #sst = load_dataset("sst", split="train")
     diffuser = StableDiffusionPipeline.from_pretrained(
@@ -60,9 +60,11 @@ def main(args: argparse.Namespace):
                           generator=generator,
                           device=args.device)
     if args.percentage:
-        sst = load_dataset("sst", split=f"{args.split}[{args.percentage}%]")
+        sst = load_dataset("sst2",
+                           "default",
+                           split=f"{args.split}[:{args.percentage}%]")
     else:
-        sst = load_dataset("sst", split=args.split)
+        sst = load_dataset("sst2", "default", split=args.split)
     multimodal_sst = sst.map(lambda sample: generate_with_diffuser(
         sample, diffuser, latents, generator, args))
     LOG.info(
