@@ -73,7 +73,7 @@ def main():
     }
 
     for t, (start, stop) in enumerate(zip(chunks[:-1], chunks[1:])):
-        LOG.info("Loading chunk from {start}% to {stop}%")
+        LOG.info(f"Loading chunk from {start}% to {stop}%")
         sst2 = load_dataset("sst2",
                             "default",
                             split=f"{args.split}[{int(start)}%:{int(stop)}%]")
