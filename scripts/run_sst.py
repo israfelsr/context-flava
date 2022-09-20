@@ -75,7 +75,6 @@ def main():
     trainer = Trainer(**OmegaConf.to_container(config.training.lightning),
                       callbacks=callbacks,
                       logger=wandb_logger,
-                      fast_dev_run=True,
                       max_epochs=5)
     ckpt_path = config.training.lightning_load_from_checkpoint
     trainer.fit(model, datamodule=datamodule, ckpt_path=ckpt_path)

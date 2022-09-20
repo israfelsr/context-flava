@@ -2,6 +2,7 @@ import argparse
 import logging
 import torch
 
+#from datasets import load_dataset, concatenate_datasets
 from diffusers import StableDiffusionPipeline
 
 LOG = logging.getLogger(__name__)
@@ -34,5 +35,20 @@ def generate_with_diffuser(sample, diffuser: StableDiffusionPipeline,
             LOG.info("Image set to black")
             break
     generator.manual_seed(args.seed)
-    sample["pixel_array"] = image["sample"][0]
+    sample["image"] = image["sample"][0]
     return sample
+
+
+def push_chunk_to_hub(chunk_dataset, split, dataset_stats, args):
+    # Load the current state of the dataset
+    LOG.info(f"Storing the dataset in split {split}")
+
+    #new_dataset = concatenate_datasets(
+    #    [old_dataset[args.split], chunk_dataset[args.split]])
+    LOG.info(f"Pushing merged dataset to HuggingFace Hub")
+    chunk_dataset.push_to_hub(
+        repo_id=args.repo_id,
+        split=split,
+        private=True,
+        toke=args.auth_token,
+    )
