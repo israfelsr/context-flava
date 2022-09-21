@@ -13,7 +13,7 @@ def generate_with_diffuser(sample, diffuser: StableDiffusionPipeline,
                            args: argparse.Namespace):
     with torch.autocast(args.device):
         image = diffuser(
-            [sample["sentence"]],
+            sample["sentence"],
             guidance_scale=7.5,
             latents=latents,
         )
@@ -26,7 +26,7 @@ def generate_with_diffuser(sample, diffuser: StableDiffusionPipeline,
         with torch.autocast("cuda"):
             idx = +1
             image = diffuser(
-                [sample["sentence"]] * 1,
+                sample["sentence"],
                 guidance_scale=7.5,
                 latents=latents,
             )
@@ -36,4 +36,6 @@ def generate_with_diffuser(sample, diffuser: StableDiffusionPipeline,
             break
     generator.manual_seed(args.seed)
     sample["image"] = image["sample"][0]
+    for k, v in sample.items():
+        LOG.info(f"{k}: {v}")
     return sample

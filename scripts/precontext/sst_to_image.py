@@ -16,7 +16,7 @@ def setup_args():
     parser = argparse.ArgumentParser(description="Create multimodal sst")
     parser.add_argument("--hf_repository",
                         type=str,
-                        default="israfelsr/sometest",
+                        default="israfelsr/multimodal_sst2",
                         help="HuggingFace repository")
     parser.add_argument("--auth_token",
                         type=str,
