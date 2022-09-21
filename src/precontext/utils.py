@@ -8,12 +8,12 @@ from diffusers import StableDiffusionPipeline
 LOG = logging.getLogger(__name__)
 
 
-def generate_with_diffuser(sample, diffuser: StableDiffusionPipeline,
+def generate_with_diffuser(batch, diffuser: StableDiffusionPipeline,
                            latents: torch.tensor, generator: torch.Generator,
                            args: argparse.Namespace):
     with torch.autocast(args.device):
         image = diffuser(
-            sample["sentence"],
+            batch["sentence"],
             guidance_scale=7.5,
             latents=latents,
         )
@@ -26,7 +26,7 @@ def generate_with_diffuser(sample, diffuser: StableDiffusionPipeline,
         with torch.autocast("cuda"):
             idx = +1
             image = diffuser(
-                sample["sentence"],
+                batch["sentence"],
                 guidance_scale=7.5,
                 latents=latents,
             )
@@ -35,7 +35,7 @@ def generate_with_diffuser(sample, diffuser: StableDiffusionPipeline,
             LOG.info("Image set to black")
             break
     generator.manual_seed(args.seed)
-    sample["image"] = image["sample"][0]
-    for k, v in sample.items():
+    batch["image"] = image["sample"][0]
+    for k, v in batch.items():
         LOG.info(f"{k}: {v}")
-    return sample
+    return batch

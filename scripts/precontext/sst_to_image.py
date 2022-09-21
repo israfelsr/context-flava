@@ -77,8 +77,10 @@ def main():
         sst2 = load_dataset("sst2",
                             "default",
                             split=f"{args.split}[{int(start)}%:{int(stop)}%]")
-        multimodal_sst2 = sst2.map(lambda sample: generate_with_diffuser(
-            sample, diffuser, latents, generator, args))
+        multimodal_sst2 = sst2.map(lambda batch: generate_with_diffuser(
+            batch, diffuser, latents, generator, args),
+                                   batched=True,
+                                   batch_size=3)
         LOG.info(f"Dataset finished with features: {multimodal_sst2.features}")
         LOG.info(f"Pushing dataset to HF respository: {args.hf_repository}")
         repo_split = f"{args.split}_{t}"
