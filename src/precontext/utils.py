@@ -18,7 +18,7 @@ def generate_with_diffuser(batch, diffuser: StableDiffusionPipeline,
             latents=latents,
         )
     idx = 0
-    while image["nsfw_content_detected"][0]:
+    while any(image["nsfw_content_detected"]):
         generator = generator.manual_seed(generator.seed() + 1)
         latents = torch.randn((1, diffuser.unet.in_channels, 64, 64),
                               generator=generator,
@@ -35,7 +35,5 @@ def generate_with_diffuser(batch, diffuser: StableDiffusionPipeline,
             LOG.info("Image set to black")
             break
     generator.manual_seed(args.seed)
-    batch["image"] = image["sample"][0]
-    for k, v in batch.items():
-        LOG.info(f"{k}: {v}")
+    batch["image"] = image["sample"]
     return batch

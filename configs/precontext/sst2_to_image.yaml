@@ -1,0 +1,15 @@
+repo_id: israfelsr/multimodal_sst2
+split: validation
+auth_token: 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
+device: cuda
+batch_size: 2
+num_chunks: 5
+num_chunk_processed: 4
+max_nsfw_tries: 5
+seed: 42
+do_merge: true
+splits_in_repo:
+  - validation_0
+  - validation_1
+  - validation_2
+  - validation_3
