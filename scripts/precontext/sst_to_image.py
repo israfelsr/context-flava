@@ -35,14 +35,14 @@ def main():
         "chunks":
         chunks,
         "num_chunks_processed":
-        config.num_chunk_processed,
+        config.num_chunks_processed,
         "splits_in_repo":
         [f"{config.split}_{t}" for t in range(config.num_chunks_processed)],
     }
 
     for t, (start, stop) in enumerate(zip(chunks[:-1], chunks[1:])):
         # Check if the chunk was already processed
-        if t < config.num_chunk_processed:
+        if t < config.num_chunks_processed:
             continue
         LOG.info(f"Loading chunk from {start}% to {stop}%")
         sst2 = load_dataset(

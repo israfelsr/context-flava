@@ -1,10 +1,10 @@
 repo_id: israfelsr/multimodal_sst2
-split: test
-auth_token: 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
+split: train
+auth_token:
 device: cuda
 batch_size: 2
-num_chunks: 5
-num_chunk_processed: 4
+num_chunks: 20
+num_chunks_processed: 0
 max_nsfw_tries: 5
 seed: 42
 do_merge: true
