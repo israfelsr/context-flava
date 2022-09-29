@@ -8,3 +8,4 @@ num_chunks_processed: 0
 max_nsfw_tries: 5
 seed: 42
 do_merge: true
+set_to_none: false

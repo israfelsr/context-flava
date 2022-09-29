@@ -34,21 +34,21 @@ training:
 datasets:
   _target_: flava.definitions.TrainingDatasetsInfo
   selected:
-  - text
+  - vl
   num_classes: 2
-  text:
+  vl:
     _target_: flava.definitions.TrainingSingleDatasetInfo
     train:
       - _target_: flava.definitions.HFDatasetInfo
-        key: israfelsr/multimodal_sst
+        key: sst2
+        rename_columns:
+        - ["sentence", "text"]
         remove_columns:
           - "idx"
-          - "pixel_array"
     val:
       - _target_: flava.definitions.HFDatasetInfo
-        key: israfelsr/multimodal_sst
+        key: sst2
+        rename_columns:
+        - ["sentence", "text"]
         remove_columns:
           - "idx"
-          - "pixel_array"
-    datamodule_extra_kwargs:
-      text_columns: ["sentence"]
