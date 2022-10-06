@@ -4,8 +4,7 @@ import sys
 import datasets
 import transformers
 
-from flava.data import TorchVisionDataModule, TextDataModule
-from flava.data.datamodules import VLDataModule
+from flava.data.datamodules import MMDataModule
 from flava.definitions import FLAVAArguments
 from flava.model import FLAVAClassificationLightningModule
 from flava.utils import build_config, build_datamodule_kwargs
@@ -38,17 +37,8 @@ def main():
     # Setting up the datamodule
     assert len(config.datasets.selected) == 1
     # TODO: when trianing multimodal/unimodal change config.dataset.selected
-    if "image" in config.datasets.selected:
-        datamodule = TorchVisionDataModule(
-            **build_datamodule_kwargs(config.datasets.image, config.training))
-    elif "text" in config.datasets.selected:
-        datamodule = TextDataModule(
-            **build_datamodule_kwargs(config.datasets.text, config.training))
-    else:
-        datamodule = VLDataModule(
-            **build_datamodule_kwargs(config.datasets.vl, config.training),
-            finetuning=True,
-        )
+    datamodule = MMDataModule(
+        **build_datamodule_kwargs(config.datasets.vl, config.training), )
 
     datamodule.setup("fit")
 
