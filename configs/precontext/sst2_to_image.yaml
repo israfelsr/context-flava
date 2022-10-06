@@ -4,7 +4,7 @@ auth_token:
 device: cuda
 batch_size: 2
 num_chunks: 20
-num_chunks_processed: 0
+num_chunks_processed: 4
 max_nsfw_tries: 5
 seed: 42
 do_merge: true

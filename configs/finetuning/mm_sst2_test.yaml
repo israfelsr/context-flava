@@ -40,17 +40,19 @@ datasets:
     _target_: flava.definitions.TrainingSingleDatasetInfo
     train:
       - _target_: flava.definitions.HFDatasetInfo
-        key: sst2
+        key: israfelsr/multimodal_sst
         rename_columns:
-        - ["sentence", "text"]
-        - ["label", "labels"]
+          - ["pixel_array", "image"]
+          - ["sentence", "text"]
         remove_columns:
           - "idx"
     val:
       - _target_: flava.definitions.HFDatasetInfo
-        key: sst2
+        key: israfelsr/multimodal_sst
         rename_columns:
-        - ["sentence", "text"]
-        - ["label", "labels"]
+          - ["pixel_array", "image"]
+          - ["sentence", "text"]
         remove_columns:
           - "idx"
+    datamodule_extra_kwargs:
+      text_columns: ["sentence"]

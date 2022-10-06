@@ -78,3 +78,12 @@ def fetch_images(batch, num_threads, timeout=None, retries=0, sleep_timer=0):
             )
         )
     return batch
+
+def set_black_image(batch, num_threads):
+    if "image" in batch:
+        # This dataset already has "image" defined.
+        return batch
+    with ThreadPoolExecutor(max_workers=num_threads) as executor:
+        pass
+    # TODO: Finish this function
+    return batch

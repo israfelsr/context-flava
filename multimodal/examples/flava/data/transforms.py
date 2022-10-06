@@ -401,3 +401,18 @@ class VLTransform:
         output.update(self.image_transform(image_dict=image))
         output.update(self.text_transform(text))
         return output
+
+class MMTrasnform:
+    def __init__(self, image_transform, text_transform) -> None:
+        self.image_transform = image_transform
+        self.text_transform = text_transform
+
+    def __call__(self, info):
+        output = {}
+        text = info["text"]
+        image = info["image"][0]
+        output["image"] = self.image_transform(image)
+        output.update(self.text_transform(text))
+        output["label"] = info["label"]
+        return output
+        

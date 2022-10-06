@@ -21,7 +21,6 @@ def main():
     config: FLAVAArguments = build_config()
     if config.training.seed != -1:
         seed_everything(config.training.seed, workers=True)
-    # TODO: check the arguments in FLAVA
     # Setup logging
     log_level = logging.INFO
     logging.basicConfig(
@@ -42,7 +41,7 @@ def main():
     if "image" in config.datasets.selected:
         datamodule = TorchVisionDataModule(
             **build_datamodule_kwargs(config.datasets.image, config.training))
-    elif "text":
+    elif "text" in config.datasets.selected:
         datamodule = TextDataModule(
             **build_datamodule_kwargs(config.datasets.text, config.training))
     else:
@@ -51,7 +50,7 @@ def main():
             finetuning=True,
         )
 
-    #datamodule.setup("fit")
+    datamodule.setup("fit")
 
     model = FLAVAClassificationLightningModule(
         num_classes=config.datasets.num_classes,

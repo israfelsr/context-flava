@@ -32,6 +32,7 @@ from .transforms import (
     TEXT_WHOLE_WORD_MASK_TOKENIZER,
     VL_MAX_LENGTH_DEFAULT,
     VLTransform,
+    MMTrasnform,
 )
 from .utils import build_datasets_from_info, fetch_images
 
@@ -283,6 +284,7 @@ class VLDataModule(LightningDataModule):
         fetch_sleep_timer: int = 0,
         fetch_timeout: Optional[float] = None,
         fetch_batch_size: int = 50,
+        # TODO: eliminate build_multimodal
         build_multimodal: bool = False,
         **kwargs,
     ):
@@ -334,13 +336,14 @@ class VLDataModule(LightningDataModule):
         val_dataset = build_datasets_from_info(
             self.val_dataset_infos, split="validation"
         )
-        
+
         if self.build_multimodal:
             def add_black_image(batch):
                 batch["image"] = [Image.new('RGB', (224, 224))] * len(batch["text"])
                 return batch
             train_dataset = train_dataset.map(lambda batch: add_black_image(batch), batched=True)
             val_dataset = val_dataset.map(lambda batch: add_black_image(batch), batched=True)
+        print(train_dataset)
 
         train_dataset = train_dataset.map(
             fetch_images,
@@ -365,7 +368,6 @@ class VLDataModule(LightningDataModule):
                 itm_probability=self.itm_probability,
             )
         )
-        
 
         val_dataset = val_dataset.map(
             fetch_images,
@@ -539,3 +541,91 @@ class TorchVisionDataModule(LightningDataModule):
         images, targets = batch
         batch = {"image": images, "labels": targets}
         return batch
+
+class MMDataModule(LightningDataModule):
+    def __init__(
+        self,
+        train_infos: List[HFDatasetInfo],
+        val_infos: List[HFDatasetInfo],
+        image_transforms: Optional[Tuple[Callable, Callable]] = None,
+        max_length: int = 512,
+        batch_size: int = 32,
+        num_workers: int = 4,
+        ignore_index: int = -1,
+        allow_uneven_batches: bool = False,
+        build_multimodal: bool = False,
+        fetch_num_threads: int = 4,
+        **kwargs: Any,
+    ):
+        super().__init__()
+        self.train_dataset_infos = train_infos
+        # TODO: text_columns?
+        self.val_dataset_infos = val_infos
+        if self.val_dataset_infos is None:
+            self.val_dataset_infos = train_infos
+        if image_transforms is None:
+            image_transforms = default_torchvision_transforms()
+        self.train_image_transform, self.test_image_transform = image_transforms
+        self.max_length = max_length
+        self.batch_size = batch_size
+        self.num_workers = num_workers
+        self.ignore_index = ignore_index
+        self.allow_uneven_batches = allow_uneven_batches
+        self.fetch_num_threads = fetch_num_threads
+        self.build_multimodal = build_multimodal
+
+    def setup(self, stage=None):
+        text_tokenizer = BertTokenizer.from_pretrained(TEXT_DEFAULT_TOKENIZER)
+        self.text_transform = default_text_transform(text_tokenizer)
+        self.text_tokenizer = self.text_transform.keywords["tokenizer"]
+        train_mm_transform = MMTrasnform(
+            self.train_image_transform, self.text_transform
+        )
+        val_mm_transform = MMTrasnform(self.test_image_transform, self.text_transform)
+
+        train_dataset = build_datasets_from_info(
+            self.train_dataset_infos, split="train"
+        )
+        val_dataset = build_datasets_from_info(
+            self.val_dataset_infos, split="validation"
+        )
+
+        if self.build_multimodal:
+            # TODO: Maybe make this in another function(?)
+            # TODO: Definition in utils.py set_black_image
+            def add_black_image(batch):
+                batch["image"] = [Image.new('RGB', (224, 224))] * len(batch["text"])
+                return batch
+            train_dataset = train_dataset.map(lambda batch: add_black_image(batch), batched=True)
+            val_dataset = val_dataset.map(lambda batch: add_black_image(batch), batched=True)
+
+        train_dataset = train_dataset.filter(
+            lambda example: example["image"] is not None
+        )
+        self.train_dataset = train_dataset
+        
+        self.train_dataset.set_transform(train_mm_transform)
+        
+        val_dataset = val_dataset.filter(lambda example: example["image"] is not None)
+        self.val_dataset = val_dataset
+        self.val_dataset.set_transform(val_mm_transform)
+    
+    def train_dataloader(self):
+        return self._build_dataloader(self.train_dataset)
+
+    def val_dataloader(self):
+        return self._build_dataloader(self.val_dataset, shuffle=False)
+
+    def _build_dataloader(self, dataset, drop_last=False, shuffle=True):
+        return torch.utils.data.DataLoader(
+            dataset,
+            batch_size=self.batch_size,
+            num_workers=self.num_workers,
+            sampler=None,
+            shuffle=shuffle,
+            collate_fn=self._build_collator(),
+            drop_last=drop_last,
+        )
+
+    def _build_collator(self):
+        return DefaultDataCollator()
