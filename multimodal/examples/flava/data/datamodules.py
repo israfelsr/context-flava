@@ -629,3 +629,19 @@ class MMDataModule(LightningDataModule):
 
     def _build_collator(self):
         return DefaultDataCollator()
+    
+    def on_before_batch_transfer(self, batch, *args):
+        batch.pop("token_type_ids", None)
+        mask = batch.pop("attention_mask", None)
+        if (
+            mask is not None
+            and mask.size(0) < self.batch_size
+            and not self.allow_uneven_batches
+        ):
+            batch = pad_batch(batch, self.batch_size)
+        return batch
+
+    def on_after_batch_transfer(self, batch, *args):
+        batch["text"] = batch.pop("input_ids")
+        batch["labels"] = batch.pop("label")
+        return batch
