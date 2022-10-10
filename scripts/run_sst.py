@@ -17,6 +17,7 @@ LOG = logging.getLogger(__name__)
 
 
 def main():
+    wandb_logger = WandbLogger()
     config: FLAVAArguments = build_config()
     if config.training.seed != -1:
         seed_everything(config.training.seed, workers=True)
@@ -60,7 +61,6 @@ def main():
             ModelCheckpoint(**OmegaConf.to_container(
                 config.training.lightning_checkpoint)))
 
-    wandb_logger = WandbLogger()
     trainer = Trainer(**OmegaConf.to_container(config.training.lightning),
                       callbacks=callbacks,
                       logger=wandb_logger,

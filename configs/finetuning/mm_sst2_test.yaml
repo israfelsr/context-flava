@@ -5,22 +5,22 @@ training:
   lightning:
     max_steps: 33112
     gpus: 1
-    progress_bar_refresh_rate: 50
-    val_check_interval: 1000
+    progress_bar_refresh_rate: 10
+    val_check_interval: 10
     num_sanity_val_steps: 0
     strategy: ddp
   lightning_checkpoint:
     dirpath: "."
     filename: flava-{epoch:02d}-{step}
     save_last: true
-    every_n_train_steps: 1000
+    every_n_train_steps: 20
     save_on_train_epoch_end: true
     verbose: true
     monitor: validation/accuracy/classification
     mode: max
   lightning_load_from_checkpoint: null
   seed: 42
-  batch_size: 32
+  batch_size: 8
   num_workers: 4
   learning_rate: 1e-5
   adam_eps: 1e-6
@@ -54,5 +54,3 @@ datasets:
           - ["sentence", "text"]
         remove_columns:
           - "idx"
-    datamodule_extra_kwargs:
-      text_columns: ["sentence"]

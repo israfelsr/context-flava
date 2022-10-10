@@ -142,6 +142,7 @@ class ImageEmbeddings(nn.Module):
         image_patches_mask: Optional[Tensor] = None,
         interpolate_pos_encoding: bool = False,
     ) -> Tensor:
+        pixel_values = torch.unsqueeze(pixel_values, 1).repeat(1, 3, 1, 1)
         batch_size, num_channels, height, width = pixel_values.shape
         embeddings = self.patch_embeddings(
             pixel_values, interpolate_pos_encoding=interpolate_pos_encoding

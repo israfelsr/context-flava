@@ -643,5 +643,4 @@ class MMDataModule(LightningDataModule):
 
     def on_after_batch_transfer(self, batch, *args):
         batch["text"] = batch.pop("input_ids")
-        batch["labels"] = batch.pop("label")
         return batch
