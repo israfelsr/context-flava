@@ -34,7 +34,7 @@ from .transforms import (
     VLTransform,
     MMTrasnform,
 )
-from .utils import build_datasets_from_info, fetch_images
+from .utils import (add_black_images, build_datasets_from_info, fetch_images, add_black_images)
 
 
 def transform_image(transform, sample):
@@ -284,8 +284,6 @@ class VLDataModule(LightningDataModule):
         fetch_sleep_timer: int = 0,
         fetch_timeout: Optional[float] = None,
         fetch_batch_size: int = 50,
-        # TODO: eliminate build_multimodal
-        build_multimodal: bool = False,
         **kwargs,
     ):
         super().__init__()
@@ -313,7 +311,6 @@ class VLDataModule(LightningDataModule):
         self.fetch_sleep_timer = fetch_sleep_timer
         self.fetch_timeout = fetch_timeout
         self.fetch_batch_size = fetch_batch_size
-        self.build_multimodal = build_multimodal
 
     def setup(self, stage=None):
         if self.text_transform is None:
@@ -336,14 +333,6 @@ class VLDataModule(LightningDataModule):
         val_dataset = build_datasets_from_info(
             self.val_dataset_infos, split="validation"
         )
-
-        if self.build_multimodal:
-            def add_black_image(batch):
-                batch["image"] = [Image.new('RGB', (224, 224))] * len(batch["text"])
-                return batch
-            train_dataset = train_dataset.map(lambda batch: add_black_image(batch), batched=True)
-            val_dataset = val_dataset.map(lambda batch: add_black_image(batch), batched=True)
-        print(train_dataset)
 
         train_dataset = train_dataset.map(
             fetch_images,
@@ -553,7 +542,7 @@ class MMDataModule(LightningDataModule):
         num_workers: int = 4,
         ignore_index: int = -1,
         allow_uneven_batches: bool = False,
-        build_multimodal: bool = False,
+        process_batch_size: int = 32,
         fetch_num_threads: int = 4,
         **kwargs: Any,
     ):
@@ -572,7 +561,7 @@ class MMDataModule(LightningDataModule):
         self.ignore_index = ignore_index
         self.allow_uneven_batches = allow_uneven_batches
         self.fetch_num_threads = fetch_num_threads
-        self.build_multimodal = build_multimodal
+        self.process_batch_size = process_batch_size
 
     def setup(self, stage=None):
         text_tokenizer = BertTokenizer.from_pretrained(TEXT_DEFAULT_TOKENIZER)
@@ -590,18 +579,22 @@ class MMDataModule(LightningDataModule):
             self.val_dataset_infos, split="validation"
         )
 
-        if self.build_multimodal:
-            # TODO: Maybe make this in another function(?)
-            # TODO: Definition in utils.py set_black_image
-            def add_black_image(batch):
-                batch["image"] = [Image.new('RGB', (224, 224))] * len(batch["text"])
-                return batch
-            train_dataset = train_dataset.map(lambda batch: add_black_image(batch), batched=True)
-            val_dataset = val_dataset.map(lambda batch: add_black_image(batch), batched=True)
+        train_dataset = train_dataset.map(lambda batch:
+            add_black_images(batch, self.process_batch_size),
+            batched=True,
+            batch_size=self.process_batch_size,
+        )
+
+        val_dataset = val_dataset.map(lambda batch:
+            add_black_images(batch, self.process_batch_size),
+            batched=True,
+            batch_size=self.process_batch_size,
+        )
 
         train_dataset = train_dataset.filter(
             lambda example: example["image"] is not None
         )
+
         self.train_dataset = train_dataset
         
         self.train_dataset.set_transform(train_mm_transform)

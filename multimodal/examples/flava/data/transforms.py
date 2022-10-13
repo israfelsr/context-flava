@@ -408,11 +408,9 @@ class MMTrasnform:
         self.text_transform = text_transform
 
     def __call__(self, info):
-        output = {}
         text = info["text"]
         image = info["image"][0]
-        output["image"] = self.image_transform(image)
-        output.update(self.text_transform(text))
-        output["label"] = info["label"]
-        return output
+        info["image"] = [self.image_transform(image)]
+        info.update(self.text_transform(text))
+        return info
         
