@@ -79,9 +79,9 @@ def fetch_images(batch, num_threads, timeout=None, retries=0, sleep_timer=0):
         )
     return batch
 
-def add_black_images(batch, process_batch_size):
+def add_black_images(batch):
     if "image" in batch:
         # This dataset already has "image" defined.
         return batch
-    batch["image"] = [Image.new('RGB', (224, 224))] * process_batch_size
+    batch["image"] = [Image.new('RGB', (224, 224))] * len(batch['text'])
     return batch

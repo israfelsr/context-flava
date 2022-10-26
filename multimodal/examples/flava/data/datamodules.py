@@ -582,9 +582,13 @@ class MMDataModule(LightningDataModule):
 
 
         train_dataset = train_dataset.map(lambda batch:
-            add_black_images(batch, self.process_batch_size),
+            add_black_images(batch),
             batched=True,
-            batch_size=self.process_batch_size,
+        )
+
+        val_dataset = val_dataset.map(lambda batch:
+            add_black_images(batch),
+            batched=True,
         )
 
         if type(train_dataset.features['image']) == dict:
@@ -592,11 +596,6 @@ class MMDataModule(LightningDataModule):
         if type(val_dataset.features['image']) == dict:
             val_dataset = val_dataset.cast_column('image', datasets.features.image.Image())
 
-        val_dataset = val_dataset.map(lambda batch:
-            add_black_images(batch, self.process_batch_size),
-            batched=True,
-            batch_size=self.process_batch_size,
-        )
 
         train_dataset = train_dataset.filter(
             lambda example: example["image"] is not None

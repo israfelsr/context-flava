@@ -45,6 +45,7 @@ datasets:
           - ["sentence", "text"]
         remove_columns:
           - "idx"
+          - "image"
     val:
       - _target_: flava.definitions.HFDatasetInfo
         key: israfelsr/multimodal_sst
@@ -52,3 +53,4 @@ datasets:
           - ["sentence", "text"]
         remove_columns:
           - "idx"
+          - "image"
