@@ -11,6 +11,7 @@ from PIL import Image
 
 import torch
 import torchvision
+import datasets
 from flava.definitions import HFDatasetInfo, TorchVisionDatasetInfo
 from pytorch_lightning import LightningDataModule
 from transformers import (
@@ -579,11 +580,17 @@ class MMDataModule(LightningDataModule):
             self.val_dataset_infos, split="validation"
         )
 
+
         train_dataset = train_dataset.map(lambda batch:
             add_black_images(batch, self.process_batch_size),
             batched=True,
             batch_size=self.process_batch_size,
         )
+
+        if type(train_dataset.features['image']) == dict:
+            train_dataset = train_dataset.cast_column('image', datasets.features.image.Image())
+        if type(val_dataset.features['image']) == dict:
+            val_dataset = val_dataset.cast_column('image', datasets.features.image.Image())
 
         val_dataset = val_dataset.map(lambda batch:
             add_black_images(batch, self.process_batch_size),

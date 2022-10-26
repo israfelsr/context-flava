@@ -42,7 +42,6 @@ datasets:
       - _target_: flava.definitions.HFDatasetInfo
         key: israfelsr/multimodal_sst
         rename_columns:
-          - ["pixel_array", "image"]
           - ["sentence", "text"]
         remove_columns:
           - "idx"
@@ -50,7 +49,6 @@ datasets:
       - _target_: flava.definitions.HFDatasetInfo
         key: israfelsr/multimodal_sst
         rename_columns:
-          - ["pixel_array", "image"]
           - ["sentence", "text"]
         remove_columns:
           - "idx"
