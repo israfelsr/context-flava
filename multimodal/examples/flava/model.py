@@ -181,6 +181,8 @@ class FLAVAClassificationLightningModule(LightningModule):
             raise RuntimeError("Batch needs to have either or both 'image' and 'text'.")
 
         labels = batch["labels"]
+        print(batch["image"])
+        print(batch["text"])
         output = self.model(
             image=batch.get("image", None),
             text=batch.get("text", None),

@@ -21,6 +21,7 @@ def main():
     config: FLAVAArguments = build_config()
     if config.training.seed != -1:
         seed_everything(config.training.seed, workers=True)
+
     # Setup logging
     log_level = logging.INFO
     logging.basicConfig(
@@ -37,7 +38,6 @@ def main():
 
     # Setting up the datamodule
     assert len(config.datasets.selected) == 1
-    # TODO: when trianing multimodal/unimodal change config.dataset.selected
     datamodule = MMDataModule(
         **build_datamodule_kwargs(config.datasets.vl, config.training), )
 

@@ -13,14 +13,14 @@ training:
     dirpath: "."
     filename: flava-{epoch:02d}-{step}
     save_last: true
-    every_n_train_steps: 20
+    every_n_train_steps: 200
     save_on_train_epoch_end: true
     verbose: true
     monitor: validation/accuracy/classification
     mode: max
   lightning_load_from_checkpoint: null
   seed: 42
-  batch_size: 8
+  batch_size: 16
   num_workers: 4
   learning_rate: 1e-5
   adam_eps: 1e-6
@@ -45,7 +45,6 @@ datasets:
           - ["sentence", "text"]
         remove_columns:
           - "idx"
-          - "image"
     val:
       - _target_: flava.definitions.HFDatasetInfo
         key: israfelsr/multimodal_sst
@@ -53,4 +52,3 @@ datasets:
           - ["sentence", "text"]
         remove_columns:
           - "idx"
-          - "image"
