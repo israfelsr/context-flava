@@ -1,0 +1,9 @@
+repo_id: israfelsr/mm_imagenet_small
+split: train
+device: cuda
+batch_size: 256
+num_chunks: 4
+num_chunks_processed: 0
+do_merge: true
+set_to_none: false
+image_size: 224

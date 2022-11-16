@@ -4,6 +4,8 @@ import torch
 
 #from datasets import load_dataset, concatenate_datasets
 from diffusers import StableDiffusionPipeline
+from torchvision import transforms
+from torchvision.transforms.functional import InterpolationMode
 
 LOG = logging.getLogger(__name__)
 
@@ -45,3 +47,17 @@ def generate_with_diffuser(batch, diffuser: StableDiffusionPipeline,
     generator.manual_seed(args.seed)
     batch["image"] = image["sample"]
     return batch
+
+
+def image_to_tensors(samples, img_size):
+    transform = transforms.Compose([
+        transforms.Resize((img_size, img_size),
+                          interpolation=InterpolationMode.BICUBIC),
+        transforms.ToTensor(),
+        transforms.Normalize((0.48145466, 0.4578275, 0.40821073),
+                             (0.26862954, 0.26130258, 0.27577711))
+    ])
+    samples['pixel_values'] = [
+        transform(image.convert("RGB")) for image in samples["image"]
+    ]
+    return samples

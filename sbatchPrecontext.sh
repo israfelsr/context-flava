@@ -1,3 +1,4 @@
 export PYTHONPATH=$(pwd)
-python scripts/precontext/sst_to_image.py\
+export PYTHONPATH=../context-flava/BLIP/:$PYTHONPATH
+python scripts/precontext/imagenet_to_text.py\
     config=./configs/precontext/sst2_to_image.yaml
