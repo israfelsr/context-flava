@@ -410,7 +410,7 @@ class MMTrasnform:
     def __call__(self, info):
         text = info["text"]
         image = info["image"][0]
-        info["image"] = [self.image_transform(image)]
+        info["image"] = [self.image_transform(image.convert("RGB"))]
         info.update(self.text_transform(text))
         return info
         
