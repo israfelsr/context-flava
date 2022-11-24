@@ -35,20 +35,20 @@ datasets:
   _target_: flava.definitions.TrainingDatasetsInfo
   selected:
   - vl
-  num_classes: 2
+  num_classes: 200
   vl:
     _target_: flava.definitions.TrainingSingleDatasetInfo
     train:
       - _target_: flava.definitions.HFDatasetInfo
-        key: israfelsr/small_mm_imagenet
+        key: israfelsr/mm_tiny_imagenet
         rename_columns:
-          - ["captions", "text"]
+          - ["caption", "text"]
         remove_columns:
           - "idx"
     val:
       - _target_: flava.definitions.HFDatasetInfo
-        key: israfelsr/small_mm_imagenet
+        key: israfelsr/mm_tiny_imagenet
         rename_columns:
-          - ["captions", "text"]
+          - ["caption", "text"]
         remove_columns:
           - "idx"
