@@ -85,3 +85,9 @@ def add_black_images(batch):
         return batch
     batch["image"] = [Image.new('RGB', (224, 224))] * len(batch['text'])
     return batch
+
+def add_empty_text(batch):
+    if "text" in batch:
+        return batch
+    batch["text"] = [""] * len(batch["image"])
+    return batch

@@ -5,8 +5,8 @@ training:
   lightning:
     max_steps: 33112
     gpus: 1
-    progress_bar_refresh_rate: 10
-    val_check_interval: 100
+    progress_bar_refresh_rate: 800
+    val_check_interval: 200
     num_sanity_val_steps: 0
     strategy: ddp
   lightning_checkpoint:
@@ -20,7 +20,7 @@ training:
     mode: max
   lightning_load_from_checkpoint: null
   seed: 42
-  batch_size: 16
+  batch_size: 24
   num_workers: 4
   learning_rate: 1e-5
   adam_eps: 1e-6
@@ -42,13 +42,13 @@ datasets:
       - _target_: flava.definitions.HFDatasetInfo
         key: israfelsr/mm_tiny_imagenet
         rename_columns:
-          - ["caption", "text"]
+          - ["label", "labels"]
         remove_columns:
-          - "idx"
+          - "caption"
     val:
       - _target_: flava.definitions.HFDatasetInfo
         key: israfelsr/mm_tiny_imagenet
         rename_columns:
-          - ["caption", "text"]
+          - ["label", "labels"]
         remove_columns:
-          - "idx"
+          - "caption"

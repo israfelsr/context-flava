@@ -35,7 +35,7 @@ from .transforms import (
     VLTransform,
     MMTrasnform,
 )
-from .utils import (add_black_images, build_datasets_from_info, fetch_images, add_black_images)
+from .utils import (add_black_images, build_datasets_from_info, fetch_images, add_empty_text)
 
 
 def transform_image(transform, sample):
@@ -580,16 +580,24 @@ class MMDataModule(LightningDataModule):
             self.val_dataset_infos, split="validation"
         )
 
-
+        # Forcing Multimodal when unimodal
         train_dataset = train_dataset.map(lambda batch:
             add_black_images(batch),
             batched=True,
         )
-
+        train_dataset = train_dataset.map(lambda batch:
+            add_empty_text(batch),
+            batched=True)
         val_dataset = val_dataset.map(lambda batch:
             add_black_images(batch),
             batched=True,
         )
+        val_dataset = val_dataset.map(lambda batch:
+            add_empty_text(batch),
+            batched=True)
+        
+
+
 
         if type(train_dataset.features['image']) == dict:
             train_dataset = train_dataset.cast_column('image', datasets.features.image.Image())
