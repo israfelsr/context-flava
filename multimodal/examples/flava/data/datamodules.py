@@ -586,20 +586,22 @@ class MMDataModule(LightningDataModule):
         )
 
         # Forcing Multimodal when unimodal
-        train_dataset = train_dataset.map(lambda batch:
-            add_random_image(batch),
-            batched=True,
-        )
-        train_dataset = train_dataset.map(lambda batch:
-            add_empty_text(batch),
-            batched=True)
-        val_dataset = val_dataset.map(lambda batch:
-            add_black_images(batch),
-            batched=True,
-        )
-        val_dataset = val_dataset.map(lambda batch:
-            add_empty_text(batch),
-            batched=True)
+        
+        #train_dataset = train_dataset.map(lambda batch:
+        #    add_random_image(batch),
+        #    batched=True,
+        #)
+        #train_dataset = train_dataset.map(lambda batch:
+        #    add_empty_text(batch),
+        #    batched=True)
+        #val_dataset = val_dataset.map(lambda batch:
+        #    add_black_images(batch),
+        #    batched=True,
+        #)
+        #val_dataset = val_dataset.map(lambda batch:
+        #    add_empty_text(batch),
+        #    batched=True)
+
 
         if type(train_dataset.features['image']) == dict:
             train_dataset = train_dataset.cast_column('image', datasets.features.image.Image())

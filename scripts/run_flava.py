@@ -65,6 +65,7 @@ def main():
                       callbacks=callbacks,
                       logger=wandb_logger,
                       max_epochs=5)
+
     ckpt_path = config.training.lightning_load_from_checkpoint
     trainer.fit(model, datamodule=datamodule, ckpt_path=ckpt_path)
     trainer.validate(datamodule=datamodule)
