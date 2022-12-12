@@ -581,6 +581,7 @@ class MMDataModule(LightningDataModule):
         train_dataset = build_datasets_from_info(
             self.train_dataset_infos, split="train"
         )
+
         val_dataset = build_datasets_from_info(
             self.val_dataset_infos, split="validation"
         )
@@ -603,23 +604,20 @@ class MMDataModule(LightningDataModule):
         #    batched=True)
 
 
-        if type(train_dataset.features['image']) == dict:
-            train_dataset = train_dataset.cast_column('image', datasets.features.image.Image())
-        if type(val_dataset.features['image']) == dict:
-            val_dataset = val_dataset.cast_column('image', datasets.features.image.Image())
+        train_dataset = train_dataset.cast_column('image', datasets.features.image.Image())
+        val_dataset = val_dataset.cast_column('image', datasets.features.image.Image())
 
 
         train_dataset = train_dataset.filter(
             lambda example: example["image"] is not None
         )
-
         self.train_dataset = train_dataset
-        
         self.train_dataset.set_transform(train_mm_transform)
-        
+
         val_dataset = val_dataset.filter(lambda example: example["image"] is not None)
         self.val_dataset = val_dataset
         self.val_dataset.set_transform(val_mm_transform)
+        
     
     def train_dataloader(self):
         return self._build_dataloader(self.train_dataset)

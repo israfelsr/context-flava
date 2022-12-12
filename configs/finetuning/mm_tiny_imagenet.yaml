@@ -4,7 +4,7 @@ training:
   _target_: flava.definitions.TrainingArguments
   lightning:
     max_steps: 33112
-    gpus: 1
+    gpus: 0
     progress_bar_refresh_rate: 800
     val_check_interval: 200
     num_sanity_val_steps: 0
@@ -43,12 +43,10 @@ datasets:
         key: israfelsr/mm_tiny_imagenet
         rename_columns:
           - ["label", "labels"]
-        remove_columns:
-          - "caption"
+          - ["caption", "text"]
     val:
       - _target_: flava.definitions.HFDatasetInfo
         key: israfelsr/mm_tiny_imagenet
         rename_columns:
           - ["label", "labels"]
-        remove_columns:
-          - "caption"
+          - ["caption", "text"]

@@ -152,7 +152,6 @@ class FLAVAClassificationLightningModule(LightningModule):
             logger=True,
             sync_dist=True,
         )
-
         return output.loss
 
     def validation_step(self, batch, batch_idx):
