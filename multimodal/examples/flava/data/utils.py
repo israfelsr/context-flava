@@ -94,10 +94,10 @@ def add_random_image(batch, percentage=0.5):
             noisy_images = np.random.randint(
                     low=0, 
                     high=256,
-                    size=(len(batch['text']), 300, 300, 3),
+                    size=(len(batch['text']), 224, 224, 3),
                     dtype=np.uint8)
             batch["image"] = [Image.fromarray(noisy_images[i]) for i in range(len(batch['text']))]
-    
+    return batch
 
 
 def add_empty_text(batch):

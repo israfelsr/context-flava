@@ -140,7 +140,7 @@ class FLAVAClassificationLightningModule(LightningModule):
         self.warmup_steps = warmup_steps
         self.max_steps = max_steps
         self.adam_betas = adam_betas
-        self.metrics = Accuracy()
+        self.metrics = Accuracy(task="multiclass", num_classes=num_classes)
 
     def training_step(self, batch, batch_idx):
         output, accuracy = self._step(batch, batch_idx)
@@ -181,7 +181,6 @@ class FLAVAClassificationLightningModule(LightningModule):
             raise RuntimeError("Batch needs to have either or both 'image' and 'text'.")
 
         labels = batch["labels"]
-        print()
         output = self.model(
             image=batch.get("image", None),
             text=batch.get("text", None),
