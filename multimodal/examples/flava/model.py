@@ -141,8 +141,26 @@ class FLAVAClassificationLightningModule(LightningModule):
         self.max_steps = max_steps
         self.adam_betas = adam_betas
         self.metrics = Accuracy(task="multiclass", num_classes=num_classes)
+        self.freeze_steps = 1000
+        self.noise_ratio = 0.5
+    
+    def noise_scheduler(self, batch_idx):
+        if self.current_epoch == 0:
+            self.max_batch = batch_idx            
+        step = self.current_epoch * self.max_batch + batch_idx 
+        use_noise = False
+        if step > self.freeze_steps:
+            self.noise_ratio = -0.00025 * step + 0.75
+        if self.noise_ratio > torch.rand(1):
+            use_noise = True
+        return use_noise
+
 
     def training_step(self, batch, batch_idx):
+        # setting the noise scheduler
+        if self.noise_scheduler(batch_idx):
+            print(self.noise_ratio)
+            batch["image"] = torch.rand(batch["image"].shape, device=self.device)
         output, accuracy = self._step(batch, batch_idx)
         self.log("train/losses/classification", output.loss, prog_bar=True, logger=True)
         self.log(
@@ -169,7 +187,7 @@ class FLAVAClassificationLightningModule(LightningModule):
 
         return output.loss
 
-    def _step(self, batch, batch_idx):
+    def _step(self, batch, batch_idx): 
         if "image" in batch and ("text" in batch or "text_masked" in batch):
             required_embedding = "mm"
         elif "image" in batch:
@@ -188,7 +206,6 @@ class FLAVAClassificationLightningModule(LightningModule):
         )
 
         accuracy = self.metrics(output.logits, labels)
-
         return output, accuracy
 
     def configure_optimizers(self):
