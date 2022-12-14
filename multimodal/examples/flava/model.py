@@ -144,10 +144,8 @@ class FLAVAClassificationLightningModule(LightningModule):
         self.freeze_steps = 1000
         self.noise_ratio = 0.5
     
-    def noise_scheduler(self, batch_idx):
-        if self.current_epoch == 0:
-            self.max_batch = batch_idx            
-        step = self.current_epoch * self.max_batch + batch_idx 
+    def noise_scheduler(self):
+        step = self.global_step
         use_noise = False
         if step > self.freeze_steps:
             self.noise_ratio = -0.00025 * step + 0.75
@@ -158,7 +156,7 @@ class FLAVAClassificationLightningModule(LightningModule):
 
     def training_step(self, batch, batch_idx):
         # setting the noise scheduler
-        if self.noise_scheduler(batch_idx):
+        if self.noise_scheduler():
             print(self.noise_ratio)
             batch["image"] = torch.rand(batch["image"].shape, device=self.device)
         output, accuracy = self._step(batch, batch_idx)
