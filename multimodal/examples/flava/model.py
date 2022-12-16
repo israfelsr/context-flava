@@ -142,13 +142,15 @@ class FLAVAClassificationLightningModule(LightningModule):
         self.adam_betas = adam_betas
         self.metrics = Accuracy(task="multiclass", num_classes=num_classes)
         self.freeze_steps = 1000
-        self.noise_ratio = 0.5
+        self.noise_ratio = 0
     
     def noise_scheduler(self):
         step = self.global_step
         use_noise = False
+        if self.noise_ratio == 0:
+            return use_noise
         if step > self.freeze_steps:
-            self.noise_ratio = -0.00025 * step + 0.75
+            self.noise_ratio = max(-0.00025 * step + 0.75, 0)
         if self.noise_ratio > torch.rand(1):
             use_noise = True
         return use_noise
@@ -157,13 +159,13 @@ class FLAVAClassificationLightningModule(LightningModule):
     def training_step(self, batch, batch_idx):
         # setting the noise scheduler
         if self.noise_scheduler():
-            print(self.noise_ratio)
             batch["image"] = torch.rand(batch["image"].shape, device=self.device)
         output, accuracy = self._step(batch, batch_idx)
         self.log("train/losses/classification", output.loss, prog_bar=True, logger=True)
         self.log(
             "train/accuracy/classification",
             accuracy,
+            {"noise_ratio": self.noise_ratio},
             prog_bar=True,
             logger=True,
             sync_dist=True,
